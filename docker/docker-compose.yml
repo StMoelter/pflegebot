@@ -1,0 +1,50 @@
+version: '2'
+services:
+  nginx: 
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "8081:80"
+    depends_on:
+      - fb_net_connector_incoming
+    networks:
+      - pb_net
+
+  fb_net_connector_incoming:
+    image: fb_net_connector_incoming:development
+    depends_on:
+      - rabbitmq
+    volumes:
+      - /home/smoelter/workspace/chatbots/pflegebot/fb_net_connector/incoming:/connector
+    networks:
+      - pb_net
+
+  fb_data_connector_incoming:
+    image: fb_data_connector_incoming:development
+    depends_on:
+      - rabbitmq
+    networks:
+      - pb_net
+  
+  rabbitmq:
+    image: rabbitmq:alpine
+    # volumes:
+      # - rabbit:/var/lib/rabbitmq
+    networks:
+      - pb_net
+
+volumes:
+  rabbit:
+    external: true
+
+networks:
+  pb_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.230.0/24
+        gateway: 172.16.230.1
+
+  
+
