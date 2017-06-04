@@ -1,0 +1,99 @@
+worker_processes  2;
+
+error_log /dev/stdout info;
+
+events {
+  worker_connections 1024;
+}
+
+http {
+  include       /usr/local/openresty/nginx/conf/mime.types;
+  default_type  application/octet-stream;
+
+  log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                    '$status $body_bytes_sent "$http_referer" '
+                    '"$http_user_agent" "$http_x_forwarded_for"';
+
+  access_log /dev/stdout;
+
+  sendfile        on;
+
+  keepalive_timeout  65;
+
+  # The "auto_ssl" shared dict must be defined with enough storage space to
+  # hold your certificate data.
+  lua_shared_dict auto_ssl 1m;
+
+  # A DNS resolver must be defined for OSCP stapling to function.
+  resolver 8.8.8.8;
+
+  # Initial setup tasks.
+  init_by_lua_block {
+    auto_ssl = (require "resty.auto-ssl").new()
+
+    -- Define a function to determine which SNI domains to automatically handle
+    -- and register new certificates for. Defaults to not allowing any domains,
+    -- so this must be configured.
+    auto_ssl:set("allow_domain", function(domain)
+      return true
+    end)
+    auto_ssl:set("dir", "/tmp")
+
+    auto_ssl:init()
+  }
+
+  init_worker_by_lua_block {
+    auto_ssl:init_worker()
+  }
+
+  # HTTP server
+  server {
+    listen 80;
+
+    # Endpoint used for performing domain verification with Let's Encrypt.
+    location /.well-known/acme-challenge/ {
+      content_by_lua_block {
+        auto_ssl:challenge_server()
+      }
+    }
+    location / {
+      return 301 https://pflegebot.com$request_uri;
+    }
+  }
+
+  # Internal server running on port 8999 for handling certificate tasks.
+  server {
+    listen 127.0.0.1:8999;
+    location / {
+      content_by_lua_block {
+        auto_ssl:hook_server()
+      }
+    }
+  }
+
+  server {
+    server_name pflegebot.com;
+    listen 443 ssl;
+    
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto https;
+    proxy_set_header Host $http_host;
+    proxy_set_header REMOTE_ADDR $remote_addr;
+    proxy_set_header Authorization "";
+    proxy_redirect off;
+
+    ssl_certificate_by_lua_block {
+      auto_ssl:ssl_certificate({ port = 443 })
+    }
+
+    location / {
+      proxy_pass http://wordpress;    
+    }
+
+    location /incoming/fb {
+      proxy_pass http://fb_net_connector_incoming:3000;    
+    }
+  }
+
+}
+

@@ -6,4 +6,8 @@ gem 'bunny'
 gem 'facebook-messenger'
 gem 'puma'
 gem 'rack'
-gem 'rubocop'
+
+group :development, :test do
+  gem 'byebug', platform: :mri
+  gem 'rubocop'
+end

@@ -1,14 +1,16 @@
 version: '2'
 services:
   nginx: 
-    image: nginx:alpine
+    image: pb-nginx
     container_name: nginx
     ports:
       - "8081:80"
     depends_on:
       - fb_net_connector_incoming
+
     networks:
       - pb_net
+    
 
   fb_net_connector_incoming:
     image: fb_net_connector_incoming:development

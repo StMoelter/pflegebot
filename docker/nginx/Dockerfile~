@@ -1,0 +1,12 @@
+FROM openresty/openresty:alpine-fat
+
+RUN apk --update add --virtual bash openssl
+
+RUN /usr/local/openresty/luajit/bin/luarocks install lua-resty-http
+RUN /usr/local/openresty/luajit/bin/luarocks install lua-resty-auto-ssl
+
+RUN openssl req -new -newkey rsa:4096 -days 3653 -nodes -x509 -subj '/CN=pflegebot.com' -keyout /etc/ssl/resty-auto-ssl-fallback.key -out /etc/ssl/resty-auto-ssl-fallback.crt
+
+ADD nginx.conf /usr/local/openresty/nginx/conf/nginx.conf
+
+ENTRYPOINT ["/usr/local/openresty/nginx/sbin/nginx", "-g", "daemon off;"]

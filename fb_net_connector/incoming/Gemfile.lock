@@ -5,6 +5,7 @@ GEM
     ast (2.3.0)
     bunny (2.7.0)
       amq-protocol (>= 2.2.0)
+    byebug (9.0.6)
     facebook-messenger (0.13.0)
       httparty (~> 0.13, >= 0.13.7)
       rack (>= 1.6.4)
@@ -35,6 +36,7 @@ PLATFORMS
 
 DEPENDENCIES
   bunny
+  byebug
   facebook-messenger
   puma
   rack
