@@ -38,11 +38,11 @@ module FbConnector
           sequence: fb_message.seq,
           sent_at: fb_message.sent_at,
           text: fb_message.text,
-          attachments: fb_message['attachments'],
+          attachments: fb_message.attachments,
           provider: 'fb',
           original_message: YAML.dump(fb_message)
         }
-        @queue.publish(internal_message.to_json)
+        @queue.publish(YAML.dump(internal_message))
       end
     end
   end

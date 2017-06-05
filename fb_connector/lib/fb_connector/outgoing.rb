@@ -14,7 +14,9 @@ module FbConnector
 
     def subscribe
       @queue.subscribe do |_delivery_info, _metadata, payload|
-        internal_message = JSON.parse payload
+        # rubocop:disable Security/YAMLLoad
+        internal_message = YAML.load payload
+        # rubocop:enable Security/YAMLLoad
         fb_message = @data_connector.message(internal_message)
         @net_connector.send_message(fb_message)
       end
@@ -28,7 +30,9 @@ module FbConnector
 
     class Net
       def send_message(internal_message)
-        fb_message = YAML.safe_load(internal_message[:original_message])
+        # rubocop:disable Security/YAMLLoad
+        fb_message = YAML.load(internal_message[:original_message])
+        # rubocop:enable Security/YAMLLoad
         fb_message.reply(text: internal_message[:text])
       end
     end

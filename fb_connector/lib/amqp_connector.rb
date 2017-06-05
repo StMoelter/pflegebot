@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'bunny'
 class AmqpConnector
   attr_reader :message_queue, :conn
 
