@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'api-ai-ruby'
 require 'bunny'
 require 'yaml'
 
@@ -12,11 +13,14 @@ begin
   message_input_queue = channel.queue('message.incoming')
   message_output_queue = channel.queue('fb.message.outgoing')
 
+  client =  ApiAiRuby::Client.new(client_access_token: '22d81fa817674cd88f2167f33ecca074')
+
   message_input_queue.subscribe do |_delivery_info, _metadata, payload|
     # rubocop:disable Security/YAMLLoad
     message = YAML.load payload
     # rubocop:enable Security/YAMLLoad
-    message[:text] = "Umgekehrt: #{message[:text].reverse}"
+    # .dig(:result, :fulfillment, :speech)
+    message[:text] = client.text_request(message[:text]).dig(:result, :fulfillment, :speech)
     message_output_queue.publish(YAML.dump(message))
   end
 

@@ -33,6 +33,7 @@ module FbConnector
         # rubocop:disable Security/YAMLLoad
         fb_message = YAML.load(internal_message[:original_message])
         # rubocop:enable Security/YAMLLoad
+        fb_message.typing_off
         fb_message.reply(text: internal_message[:text])
       end
     end
