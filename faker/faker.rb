@@ -5,19 +5,29 @@ require 'yaml'
 
 failure_counter = 0
 begin
-  # conn = Bunny.new('amqp://guest:guest@127.0.0.1:5672')
-  conn = Bunny.new('amqp://guest:guest@rabbitmq:5672')
+  conn = Bunny.new('amqp://guest:guest@127.0.0.1:5672')
+  # conn = Bunny.new('amqp://guest:guest@rabbitmq:5672')
   conn.start
   channel = conn.create_channel
   message_input_queue = channel.queue('message.incoming')
-  message_output_queue = channel.queue('fb.message.outgoing')
+  fb_message_output_queue = channel.queue('fb.message.outgoing')
+  sc_message_output_queue = channel.queue('sc.message.outgoing')
 
   message_input_queue.subscribe do |_delivery_info, _metadata, payload|
     # rubocop:disable Security/YAMLLoad
     message = YAML.load payload
     # rubocop:enable Security/YAMLLoad
     message[:text] = "Umgekehrt: #{message[:text].reverse}"
-    message_output_queue.publish(YAML.dump(message))
+    provider = message[:provider]
+    queue = nil
+    if provider == 'fb'
+      queue = fb_message_output_queue
+    elsif provider == 'sc'
+      queue = sc_message_output_queue
+    else
+      raise "Unknown Provider #{provider}"
+    end
+    queue&.publish(YAML.dump(message))
   end
 
   Thread.list.each { |t| t.join unless t == Thread.current }

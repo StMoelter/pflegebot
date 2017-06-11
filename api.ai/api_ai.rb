@@ -11,9 +11,10 @@ begin
   conn.start
   channel = conn.create_channel
   message_input_queue = channel.queue('message.incoming')
-  message_output_queue = channel.queue('fb.message.outgoing')
+  fb_message_output_queue = channel.queue('fb.message.outgoing')
+  sc_message_output_queue = channel.queue('sc.message.outgoing')
 
-  client =  ApiAiRuby::Client.new(client_access_token: '22d81fa817674cd88f2167f33ecca074')
+  client = ApiAiRuby::Client.new(client_access_token: '22d81fa817674cd88f2167f33ecca074')
 
   message_input_queue.subscribe do |_delivery_info, _metadata, payload|
     # rubocop:disable Security/YAMLLoad
@@ -21,7 +22,17 @@ begin
     # rubocop:enable Security/YAMLLoad
     # .dig(:result, :fulfillment, :speech)
     message[:text] = client.text_request(message[:text]).dig(:result, :fulfillment, :speech)
-    message_output_queue.publish(YAML.dump(message))
+
+    queue = nil
+    if provider == 'fb'
+      queue = fb_message_output_queue
+    elsif provider == 'sc'
+      queue = sc_message_output_queue
+    else
+      raise "Unknown Provider #{provider}"
+    end
+
+    queue.publish(YAML.dump(message))
   end
 
   Thread.list.each { |t| t.join unless t == Thread.current }

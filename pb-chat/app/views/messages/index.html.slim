@@ -1,9 +1,9 @@
 div.panel.panel-info
   .panel-heading
     h3.panel-title
-      | Signed in as
-  .panel-body
-    =cookies.signed[:username]
+      | Debug session
+  #session.panel-body  data={session: @session}
+    =@session
 
 
 div.panel.panel-success
@@ -15,9 +15,9 @@ div.panel.panel-success
       thead
         tr
           th
-            | User
+            | You
           th
-            | Message
+            | Pflegebot
       tbody#messages
 
 

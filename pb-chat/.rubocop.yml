@@ -1,0 +1,35 @@
+Rails:
+  Enabled: true
+
+AllCops:
+  TargetRubyVersion: 2.3
+  Exclude:
+    - 'test/test_helper.rb'
+    - 'bin/spring'
+    - 'db/schema.rb'
+    - 'bin/*'
+
+Metrics/LineLength:
+  Max: 150
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+MethodLength:
+  Max: 35
+
+Metrics/CyclomaticComplexity:
+  Max: 10
+
+Metrics/PerceivedComplexity:
+  Max: 10
+
+Metrics/AbcSize:
+  Enabled: true
+  Max: 25
+
+BlockLength:
+  Max: 70

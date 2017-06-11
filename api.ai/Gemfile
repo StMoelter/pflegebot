@@ -2,8 +2,8 @@
 
 source 'https://rubygems.org'
 
-gem 'bunny'
 gem 'api-ai-ruby'
+gem 'bunny'
 
 group :development, :test do
   gem 'byebug', platform: :mri
