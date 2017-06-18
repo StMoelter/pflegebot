@@ -30,7 +30,7 @@ class AmqpConnector
   end
 end
 
-BUNNY_HOST = '127.0.0.1'
+BUNNY_HOST = ENV['BUNNY_HOST'] || '127.0.0.1'
 
 if ENV['NO_BUNNY'].blank?
   amqp_connector = AmqpConnector.new(BUNNY_HOST)
