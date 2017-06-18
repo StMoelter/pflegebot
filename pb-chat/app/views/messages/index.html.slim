@@ -1,31 +1,22 @@
-div.panel.panel-info
+.panel.panel-success
   .panel-heading
     h3.panel-title
-      | Debug session
-  #session.panel-body  data={session: @session}
-    =@session
-
-
-div.panel.panel-success
-  .panel-heading
-    h3.panel-title
-      | Conversation goes here
+      | Unterhaltung
   .panel-body
     table.table
       thead
         tr
           th
-            | You
+            | Sie
           th
             | Pflegebot
       tbody#messages
 
-
 .panel.panel-default
   .panel-heading
     h3.panel-title
-      | Type something
+      | Text Eingabe
   .panel-body
-    = text_field_tag :body, '', id: 'chat-speak'
+    = text_area_tag :body, '', id: 'chat-speak', rows: 3, style: 'width: 100%;'
   .panel-footer
-    | hit enter
+    | Zum senden Enter Taste drücken

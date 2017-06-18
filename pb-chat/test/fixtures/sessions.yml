@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  uuid: MyString
+  activated: false
+  active_until: 2017-06-16 17:06:13
+
+two:
+  uuid: MyString
+  activated: false
+  active_until: 2017-06-16 17:06:13

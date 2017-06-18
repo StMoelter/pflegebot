@@ -31,21 +31,24 @@ class AmqpConnector
 end
 
 BUNNY_HOST = '127.0.0.1'
-amqp_connector = AmqpConnector.new(BUNNY_HOST)
-channel = amqp_connector.conn.create_channel
-queue = channel.queue('sc.message.outgoing')
 
-queue.subscribe do |_delivery_info, _metadata, payload|
-  # rubocop:disable Security/YAMLLoad
-  internal_message = YAML.load payload
-  # rubocop:enable Security/YAMLLoad
+if ENV['NO_BUNNY'].blank?
+  amqp_connector = AmqpConnector.new(BUNNY_HOST)
+  channel = amqp_connector.conn.create_channel
+  queue = channel.queue('sc.message.outgoing')
 
-  message = ApplicationController.render(
-    partial: 'messages/message',
-    locals: {
-      user_message: '',
-      pb_message: internal_message[:text]
-    }
-  )
-  ActionCable.server.broadcast("messages-#{internal_message[:session]}", message: message)
+  queue.subscribe do |_delivery_info, _metadata, payload|
+    # rubocop:disable Security/YAMLLoad
+    internal_message = YAML.load payload
+    # rubocop:enable Security/YAMLLoad
+
+    message = ApplicationController.render(
+      partial: 'messages/message',
+      locals: {
+        user_message: '',
+        pb_message: internal_message[:text]
+      }
+    )
+    ActionCable.server.broadcast("messages-#{internal_message[:session]}", message: message)
+  end
 end
